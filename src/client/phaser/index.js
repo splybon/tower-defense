@@ -2,9 +2,10 @@ import Phaser from 'phaser';
 import Enemy from './enemy';
 import Turret from './turret';
 import Bullet from './Bullet';
-import { MAP, BULLET_DAMAGE } from '../appConfig';
 
-import io from 'socket.io-client';
+import { MAP, BULLET_DAMAGE } from '../../appConfig';
+
+import socketListeners from './socketListeners';
 
 const config = {
   type: Phaser.AUTO,
@@ -66,11 +67,7 @@ function create() {
   bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
 
-  this.socket = io('http://localhost:8080');
-  this.socket.on('connect', () => {});
-  // this.socket.on('newPlayer', function(playerObj) {
-  //   players[playerObj.id] = playerObj.player;
-  // });
+  socketListeners(players);
 }
 
 function update(time, delta) {

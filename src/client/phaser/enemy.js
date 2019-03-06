@@ -1,4 +1,4 @@
-import { ENEMY_SPEED } from '../appConfig';
+import { ENEMY_SPEED } from '../../appConfig';
 
 const Enemy = new Phaser.Class({
   Extends: Phaser.GameObjects.Image,

@@ -13,11 +13,8 @@ var definePlugin = new webpack.DefinePlugin({
 
 module.exports = {
   entry: {
-    app: [
-      'babel-polyfill',
-      path.resolve(__dirname, 'src/client/phaser'),
-      path.resolve(__dirname, 'src/server/server.js')
-    ],
+    game: ['babel-polyfill', path.resolve(__dirname, 'src/client/phaser')],
+    player: ['babel-polyfill', path.resolve(__dirname, 'src/client/player')],
     vendor: ['phaser', 'webfontloader']
   },
   devtool: 'cheap-source-map',
@@ -25,7 +22,7 @@ module.exports = {
     pathinfo: true,
     path: path.resolve(__dirname, 'dist'),
     publicPath: './dist/',
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   watch: true,
   plugins: [
@@ -35,11 +32,20 @@ module.exports = {
       filename: 'vendor.bundle.js' /* filename= */
     }),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: './public/index.html',
+      filename: 'game.html',
+      template: './public/game.html',
       favicon: './public/favicon.ico',
       manifest: './public/manifest.json',
-      chunks: ['vendor', 'app'],
+      chunks: ['vendor', 'game'],
+      chunksSortMode: 'manual',
+      hash: false
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'player.html',
+      template: './public/player.html',
+      favicon: './public/favicon.ico',
+      manifest: './public/manifest.json',
+      chunks: ['vendor', 'player'],
       chunksSortMode: 'manual',
       hash: false
     }),
@@ -49,6 +55,7 @@ module.exports = {
       server: {
         baseDir: ['./', './dist']
       },
+      ghostMode: false,
       target: 'http://localhost:8080',
       ws: true
     })

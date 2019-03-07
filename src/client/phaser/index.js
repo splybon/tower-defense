@@ -5,7 +5,7 @@ import Bullet from './Bullet';
 
 import { MAP, BULLET_DAMAGE } from '../../appConfig';
 
-import socketListeners from './socketListeners';
+import io from 'socket.io-client';
 
 const config = {
   type: Phaser.AUTO,
@@ -25,11 +25,22 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-var players = {};
+var players = {
+  example: {
+    color: '#4286f4',
+    lives: 20,
+    id: null,
+    path: 'x',
+    direction: 1,
+    initialStart: [0, 500]
+  }
+};
+
 var enemies;
 var turrets;
 var bullets;
 var paths = {};
+var socket;
 
 function preload() {
   // load the game assets – enemy and turret atlas
@@ -72,17 +83,17 @@ function create() {
 
 function update(time, delta) {
   // if its time for the next enemy
-  if (time > this.nextEnemy) {
-    var enemy = enemies.get();
-    if (enemy) {
-      enemy.setActive(true);
-      enemy.setVisible(true);
-      // place the enemy at the start of the path
-      // enemy.setPlayer(players);
-      enemy.startOnPath(paths);
-      this.nextEnemy = time + 2000;
-    }
-  }
+  // if (time > this.nextEnemy) {
+  //   var enemy = enemies.get();
+  //   if (enemy) {
+  //     enemy.setActive(true);
+  //     enemy.setVisible(true);
+  //     // place the enemy at the start of the path
+  //     // enemy.setPlayer(players);
+  //     enemy.startOnPath(paths);
+  //     this.nextEnemy = time + 2000;
+  //   }
+  // }
 }
 
 function drawGrid(graphics) {
@@ -123,4 +134,24 @@ function damageEnemy(enemy, bullet) {
     // decrease the enemy hp with BULLET_DAMAGE
     enemy.receiveDamage(BULLET_DAMAGE);
   }
+}
+
+function socketListeners() {
+  socket = io('http://localhost:8080');
+  // socket.emit('newPlayer');
+  socket.on('userCreatePlayer', ({ player, playerId }) => {
+    players[playerId] = player;
+  });
+
+  socket.on('userCreateEnemy', playerId => {
+    console.log('created Enemy');
+    var enemy = enemies.get();
+    if (enemy) {
+      enemy.setActive(true);
+      enemy.setVisible(true);
+      // place the enemy at the start of the path
+      enemy.setPlayer(players[playerId]);
+      enemy.startOnPath(paths);
+    }
+  });
 }

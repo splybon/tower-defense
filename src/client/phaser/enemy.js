@@ -9,11 +9,9 @@ const Enemy = new Phaser.Class({
     this.follower = { t: 0, vec: new Phaser.Math.Vector2() };
   },
   startOnPath: function(paths) {
-    // this.path = paths[this.player.path];
-    this.path = paths['x'];
+    this.path = paths[this.player.path];
     // set the t parameter at the start of the path
-    // this.follower.t = this.player.direction > 0 ? 0 : 1;
-    this.follower.t = -1 > 0 ? 0 : 1;
+    this.follower.t = this.player.direction > 0 ? 0 : 1;
     this.hp = 100;
 
     // get x and y of the given t point
@@ -36,8 +34,7 @@ const Enemy = new Phaser.Class({
   },
   update: function(time, delta) {
     // move the t point along the path, 0 is the start and 0 is the end
-    // this.follower.t += ENEMY_SPEED * this.player.direction;
-    this.follower.t += ENEMY_SPEED * -1;
+    this.follower.t += ENEMY_SPEED * this.player.direction;
     // get the new x and y coordinates in vec
     this.path.getPoint(this.follower.t, this.follower.vec);
 

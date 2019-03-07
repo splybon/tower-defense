@@ -39,6 +39,7 @@ const PLAYER_STATS = {
 };
 
 let players = {};
+
 let assignedLocations = [];
 
 function assignPlayerStats(socketId) {
@@ -49,22 +50,37 @@ function assignPlayerStats(socketId) {
   Object.assign(players[socketId], PLAYER_STATS[location]);
 }
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/game.html');
-});
-
 app.get('/player', function(req, res) {
   res.sendFile(__dirname + '/player.html');
 });
 
 io.on('connection', function(socket) {
-  console.log('a user connected');
-
+  console.log('new connection');
   socket.on('newPlayer', () => {
     players[socket.id] = {};
     assignPlayerStats(socket.id);
-    console.log(players);
-    socket.emit('createPlayer', players[socket.id]);
+    socket.broadcast.emit('userCreatePlayer', {
+      player: players[socket.id],
+      playerId: socket.id
+    });
+  });
+
+  socket.on('createEnemy', () => {
+    console.log('create enemy');
+    socket.broadcast.emit('userCreateEnemy', socket.id);
+  });
+
+  socket.on('start', () => {
+    console.log('start called', socket.id);
+    io.emit('userStart');
+  });
+
+  socket.on('disconnect', function() {
+    console.log('user disconnected');
+    // remove this player from our players object
+    delete players[socket.id];
+    // emit a message to all players to remove this player
+    io.emit('disconnect', socket.id);
   });
 });
 

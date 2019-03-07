@@ -1,4 +1,4 @@
-import { ENEMY_SPEED } from '../../appConfig';
+import { ENEMY_SPEED } from './config';
 
 const Enemy = new Phaser.Class({
   Extends: Phaser.GameObjects.Image,
@@ -9,6 +9,7 @@ const Enemy = new Phaser.Class({
     this.follower = { t: 0, vec: new Phaser.Math.Vector2() };
   },
   startOnPath: function(paths) {
+    console.log(this.player);
     this.path = paths[this.player.path];
     // set the t parameter at the start of the path
     this.follower.t = this.player.direction > 0 ? 0 : 1;
@@ -29,8 +30,9 @@ const Enemy = new Phaser.Class({
       this.setVisible(false);
     }
   },
-  setPlayer: function(player) {
+  setData: function({ player, playerToAttack }) {
     this.player = player;
+    this.playerToAttack = playerToAttack;
   },
   update: function(time, delta) {
     // move the t point along the path, 0 is the start and 0 is the end

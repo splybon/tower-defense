@@ -3,7 +3,7 @@ import Enemy from './enemy';
 import Turret from './turret';
 import Bullet from './Bullet';
 
-import { MAP, BULLET_DAMAGE } from '../../appConfig';
+import { MAP, BULLET_DAMAGE } from './config';
 
 import io from 'socket.io-client';
 
@@ -25,16 +25,7 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-var players = {
-  example: {
-    color: '#4286f4',
-    lives: 20,
-    id: null,
-    path: 'x',
-    direction: 1,
-    initialStart: [0, 500]
-  }
-};
+var players = {};
 
 var enemies;
 var turrets;
@@ -81,20 +72,7 @@ function create() {
   socketListeners(players);
 }
 
-function update(time, delta) {
-  // if its time for the next enemy
-  // if (time > this.nextEnemy) {
-  //   var enemy = enemies.get();
-  //   if (enemy) {
-  //     enemy.setActive(true);
-  //     enemy.setVisible(true);
-  //     // place the enemy at the start of the path
-  //     // enemy.setPlayer(players);
-  //     enemy.startOnPath(paths);
-  //     this.nextEnemy = time + 2000;
-  //   }
-  // }
-}
+function update(time, delta) {}
 
 function drawGrid(graphics) {
   graphics.lineStyle(1, 0x0000ff, 0.8);
@@ -139,18 +117,22 @@ function damageEnemy(enemy, bullet) {
 function socketListeners() {
   socket = io('http://localhost:8080');
   // socket.emit('newPlayer');
-  socket.on('userCreatePlayer', ({ player, playerId }) => {
+  socket.on('updatePlayer', ({ player, playerId }) => {
     players[playerId] = player;
+    console.log(players);
   });
 
-  socket.on('userCreateEnemy', playerId => {
-    console.log('created Enemy');
+  socket.on('userCreateEnemy', ({ playerId, playerToAttack }) => {
+    console.log('creating enemy for player', playerToAttack);
     var enemy = enemies.get();
     if (enemy) {
       enemy.setActive(true);
       enemy.setVisible(true);
       // place the enemy at the start of the path
-      enemy.setPlayer(players[playerId]);
+      enemy.setData({
+        player: players[playerId],
+        playerToAttack: playerToAttack
+      });
       enemy.startOnPath(paths);
     }
   });

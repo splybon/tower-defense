@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+var VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 // Phaser webpack config
 var phaserModule = path.join(__dirname, '/node_modules/phaser/');
@@ -26,6 +27,7 @@ module.exports = {
   },
   watch: true,
   plugins: [
+    new VueLoaderPlugin(),
     definePlugin,
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor' /* chunkName= */,
@@ -74,6 +76,11 @@ module.exports = {
         use: ['babel-loader'],
         include: path.join(__dirname, 'src')
       },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      { test: /\.css$/, use: ['vue-style-loader', 'css-loader'] },
       { test: /phaser-split\.js$/, use: ['expose-loader?Phaser'] }
     ]
   },

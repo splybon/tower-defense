@@ -7,7 +7,6 @@ const PLAYER_STATS = {
   1: {
     color: '#4286f4',
     lives: 20,
-    id: null,
     path: 'y',
     direction: 1,
     initialStart: [500, 0]
@@ -15,7 +14,6 @@ const PLAYER_STATS = {
   2: {
     color: '#4286f4',
     lives: 20,
-    id: null,
     path: 'x',
     direction: -1,
     initialStart: [1000, 500]
@@ -23,7 +21,6 @@ const PLAYER_STATS = {
   3: {
     color: '#4286f4',
     lives: 20,
-    id: null,
     path: 'y',
     direction: -1,
     initialStart: [500, 1000]
@@ -31,7 +28,6 @@ const PLAYER_STATS = {
   4: {
     color: '#4286f4',
     lives: 20,
-    id: null,
     path: 'x',
     direction: 1,
     initialStart: [0, 500]
@@ -47,7 +43,7 @@ function assignPlayerStats(socketId) {
   const location = (assignedLocations[assignedLocations.length - 1] || 0) + 1;
   players[socketId].location = location;
   assignedLocations.push(location);
-  Object.assign(players[socketId], PLAYER_STATS[location]);
+  Object.assign(players[socketId], PLAYER_STATS[location] || PLAYER_STATS[4]);
 }
 
 app.get('/player', function(req, res) {
@@ -55,23 +51,25 @@ app.get('/player', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-  console.log('new connection');
+  console.log('new connection with socket:', socket.id);
   socket.on('newPlayer', () => {
     players[socket.id] = {};
     assignPlayerStats(socket.id);
-    socket.broadcast.emit('userCreatePlayer', {
+    io.emit('updatePlayer', {
       player: players[socket.id],
       playerId: socket.id
     });
   });
 
-  socket.on('createEnemy', () => {
-    console.log('create enemy');
-    socket.broadcast.emit('userCreateEnemy', socket.id);
+  socket.on('createEnemy', playerToAttack => {
+    console.log('attacking plyaer', playerToAttack);
+    socket.broadcast.emit('userCreateEnemy', {
+      playerId: socket.id,
+      playerToAttack
+    });
   });
 
   socket.on('start', () => {
-    console.log('start called', socket.id);
     io.emit('userStart');
   });
 

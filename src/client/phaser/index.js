@@ -131,7 +131,7 @@ function socketListeners() {
       // place the enemy at the start of the path
       enemy.setData({
         player: players[playerId],
-        playerToAttack: playerToAttack
+        playerToAttack
       });
       enemy.startOnPath(paths);
     }

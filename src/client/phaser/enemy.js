@@ -1,23 +1,4 @@
-import { ENEMY_SPEED } from './config';
-
-const PLAYER_STATS = {
-  1: {
-    path: 'y',
-    direction: 1
-  },
-  2: {
-    path: 'x',
-    direction: -1
-  },
-  3: {
-    path: 'y',
-    direction: -1
-  },
-  4: {
-    path: 'x',
-    direction: 1
-  }
-};
+import { ENEMY_SPEED, PLAYER_STATS } from './config';
 
 const Enemy = new Phaser.Class({
   Extends: Phaser.GameObjects.Image,
@@ -32,7 +13,7 @@ const Enemy = new Phaser.Class({
     this.path = this.paths[this.player.path];
     // set the t parameter at the start of the path
     this.follower.t = this.direction > 0 ? 0 : 1;
-    this.hp = 100;
+    this.hp = 30;
 
     // get x and y of the given t point
     this.path.getPoint(this.follower.t, this.follower.vec);

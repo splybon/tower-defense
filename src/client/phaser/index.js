@@ -3,7 +3,7 @@ import Enemy from './enemy';
 import Turret from './turret';
 import Bullet from './Bullet';
 
-import { MAP, BULLET_DAMAGE } from './config';
+import { MAP, BULLET_DAMAGE, PLAYER_STATS } from './config';
 
 import io from 'socket.io-client';
 
@@ -65,7 +65,7 @@ function create() {
   enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
   this.nextEnemy = 0;
   turrets = this.add.group({ classType: Turret, runChildUpdate: true });
-  this.input.on('pointerdown', placeTurret);
+  this.input.on('pointerdown', placePointerTurret);
   bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
 
@@ -87,9 +87,11 @@ function drawGrid(graphics) {
   graphics.strokePath();
 }
 
-function placeTurret(pointer) {
+function placePointerTurret(pointer) {
   const i = Math.floor(pointer.y / 100);
   const j = Math.floor(pointer.x / 100);
+  console.log('i', i);
+  console.log('j', j);
   if (MAP[i][j] === 0) {
     const turret = turrets.get();
     if (turret) {
@@ -99,6 +101,20 @@ function placeTurret(pointer) {
       turret.place(i, j);
       MAP[i][j] === 1;
     }
+  }
+}
+
+function placeTurret(playerId, turretCount) {
+  const turret = turrets.get();
+  if (turret) {
+    const { location } = players[playerId];
+    const j = PLAYER_STATS[location].turretPlacement[turretCount][0];
+    const i = PLAYER_STATS[location].turretPlacement[turretCount][1];
+    turret.setActive(true);
+    turret.setVisible(true);
+    turret.setVars({ enemies, bullets, location });
+    turret.place(i, j);
+    console.log('turretPlaced');
   }
 }
 
@@ -135,5 +151,10 @@ function socketListeners() {
       });
       enemy.startOnPath(paths);
     }
+  });
+
+  socket.on('userBuildTurret', ({ playerId, turretCount }) => {
+    players[playerId].turretCount;
+    placeTurret(playerId, turretCount);
   });
 }

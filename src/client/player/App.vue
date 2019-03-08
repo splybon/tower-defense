@@ -17,7 +17,7 @@
           </div>
         </div>
         <div class="flex-box">
-          <div class="button" @click="createEnemy" :disabled="funds < 10">
+          <div class="button" @click="buildTurret" :disabled="funds < 10">
             <h4>Build Turret</h4>
             <strong>$10</strong>
           </div>
@@ -99,7 +99,10 @@ export default {
       this.economyLevel++;
     },
     economyUpgradeCost() {
-      return 8 + 2 ** this.economyLevel;
+      return 18 + 2 ** this.economyLevel;
+    },
+    buildTurret() {
+      this.socket.emit('buildTurret');
     }
   },
   created() {

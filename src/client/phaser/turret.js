@@ -1,8 +1,11 @@
 import Phaser from 'phaser';
 
-function getEnemy(enemies, x, y, distance) {
+function getEnemy(enemies, x, y, distance, location) {
   var enemyUnits = enemies.getChildren();
   for (var i = 0; i < enemyUnits.length; i++) {
+    console.log('enemy location', enemyUnits[i].location);
+    console.log('turret location', location);
+    if (enemyUnits[i].player.location === location) continue;
     if (
       enemyUnits[i].active &&
       Phaser.Math.Distance.Between(x, y, enemyUnits[i].x, enemyUnits[i].y) <=
@@ -27,7 +30,8 @@ const Turret = new Phaser.Class({
     Phaser.GameObjects.Image.call(this, scene, 0, 0, 'sprites', 'turret');
     this.nextTic = 0;
   },
-  setVars: function({ enemies, bullets }) {
+  setVars: function({ enemies, bullets, location }) {
+    this.location = location;
     this.enemies = enemies;
     this.bullets = bullets;
   },
@@ -37,7 +41,7 @@ const Turret = new Phaser.Class({
     this.x = j * 100 + 100 / 2;
   },
   fire: function() {
-    var enemy = getEnemy(this.enemies, this.x, this.y, 200);
+    var enemy = getEnemy(this.enemies, this.x, this.y, 200, this.location);
     if (enemy) {
       var angle = Phaser.Math.Angle.Between(this.x, this.y, enemy.x, enemy.y);
       addBullet(this.bullets, this.x, this.y, angle);
@@ -50,7 +54,7 @@ const Turret = new Phaser.Class({
       this.fire();
       this.nextTic = time + 1000;
     }
-  },
+  }
 });
 
 export default Turret;

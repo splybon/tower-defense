@@ -11,7 +11,7 @@
     <div class="flex-container">
       <div class="flex-row">
         <div class="flex-box">
-          <div class="button" @click="createEnemy" :disabled="funds < 10">
+          <div class="button" v-bind:class="{disabled: funds < 10}" @click="createEnemy">
             <h4>Send Enemy</h4>
             <strong>$10</strong>
           </div>
@@ -31,9 +31,15 @@
           </div>
         </div>
         <div class="flex-box">
-          <div class="button" @click="createEnemy" :disabled="funds < 10">
+          <div
+            class="button"
+            @click="upgradeEconomy"
+            v-bind:class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
+          >
             <h4>Upgrade Economy</h4>
-            <strong>$10</strong>
+            <strong>${{economyUpgradeCost()}}</strong>
+            <br>
+            <small>Level: {{economyLevel}}</small>
           </div>
         </div>
       </div>
@@ -52,12 +58,14 @@ export default {
   data() {
     return {
       message: 'Hello World',
-      funds: 100,
+      funds: 10,
       socket: null,
       sessionId: '',
       player: {},
       playerToAttack: null,
-      started: false
+      started: false,
+      fundsTimeout: 1500,
+      economyLevel: 1
     };
   },
   methods: {
@@ -68,7 +76,7 @@ export default {
       this.funds += 1;
       setTimeout(() => {
         this.addFunds();
-      }, 500);
+      }, this.fundsTimeout);
     },
     createEnemy() {
       if (
@@ -83,6 +91,15 @@ export default {
     },
     playerToAttackOptions() {
       return [1, 2, 3, 4].filter(num => num !== this.player.location);
+    },
+    upgradeEconomy() {
+      if (this.economyLevel >= 10) return;
+      this.fundsTimeout -= 200;
+      this.funds -= this.economyUpgradeCost();
+      this.economyLevel++;
+    },
+    economyUpgradeCost() {
+      return 8 + 2 ** this.economyLevel;
     }
   },
   created() {
@@ -144,5 +161,8 @@ h4 {
 }
 .v-select .dropdown-toggle .clear {
   visibility: hidden;
+}
+.disabled {
+  color: #fff;
 }
 </style>

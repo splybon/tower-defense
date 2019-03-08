@@ -53,6 +53,7 @@
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.1.1",
     "uws": "^10.148.1",
+    "vue-select": "^2.5.1",
     "webfontloader": "^1.6.28"
   }
 }

@@ -62,7 +62,6 @@ io.on('connection', function(socket) {
   });
 
   socket.on('createEnemy', playerToAttack => {
-    console.log('attacking plyaer', playerToAttack);
     socket.broadcast.emit('userCreateEnemy', {
       playerId: socket.id,
       playerToAttack
@@ -79,6 +78,14 @@ io.on('connection', function(socket) {
     delete players[socket.id];
     // emit a message to all players to remove this player
     io.emit('disconnect', socket.id);
+  });
+
+  socket.on('losePlayerLife', playerId => {
+    players[playerId].lives -= 1;
+    io.emit('updatePlayer', {
+      player: players[socket.id],
+      playerId: socket.id
+    });
   });
 });
 

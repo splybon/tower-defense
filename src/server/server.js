@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
+var path = require('path');
 
 const PLAYER_STATS = {
   1: {
@@ -52,10 +53,6 @@ function assignPlayerStats(socketId) {
   }
   Object.assign(players[socketId], PLAYER_STATS[location] || PLAYER_STATS[4]);
 }
-
-app.get('/player', function(req, res) {
-  res.sendFile(__dirname + '/player.html');
-});
 
 io.on('connection', function(socket) {
   console.log('new connection with socket:', socket.id);
@@ -108,3 +105,17 @@ app.set('port', 8080);
 server.listen(app.get('port'), function() {
   console.log(`Listening on ${server.address().port}`);
 });
+
+app.get('/player', function(req, res) {
+  res.sendFile(path.resolve('dist/player.html'));
+});
+
+app.use('/dist', express.static('dist'));
+
+// app.get('/dist/vendor.bundle.js', function(req, res) {
+//   res.sendFile(path.resolve('dist/vendor.bundle.js'));
+// });
+
+// app.get('/dist/player.js', function(req, res) {
+//   res.sendFile(path.resolve('dist/player.js'));
+// });

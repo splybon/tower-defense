@@ -106,7 +106,7 @@ export default {
     }
   },
   created() {
-    this.socket = io('http://localhost:8080');
+    this.socket = io(window.location.origin);
     this.socket.on('connect', () => {
       this.sessionId = this.socket.id; //
     });

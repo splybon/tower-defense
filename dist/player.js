@@ -9590,7 +9590,7 @@ exports.default = {
   created: function created() {
     var _this3 = this;
 
-    this.socket = (0, _socket2.default)('http://localhost:8080');
+    this.socket = (0, _socket2.default)(window.location.origin);
     this.socket.on('connect', function () {
       _this3.sessionId = _this3.socket.id; //
     });

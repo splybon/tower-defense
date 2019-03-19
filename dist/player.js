@@ -8920,7 +8920,7 @@ var render = function() {
                     class: {
                       disabled:
                         _vm.funds < this.economyUpgradeCost() ||
-                        _vm.economyLevel >= 10
+                        _vm.economyLevel >= 8
                     },
                     on: { click: _vm.upgradeEconomy }
                   },
@@ -9585,13 +9585,13 @@ exports.default = {
       });
     },
     upgradeEconomy: function upgradeEconomy() {
-      if (this.economyLevel >= 10 || !this.active) return;
+      if (this.economyLevel >= 8 || !this.active) return;
       this.fundsTimeout -= 200;
       this.funds -= this.economyUpgradeCost();
       this.economyLevel++;
     },
     economyUpgradeCost: function economyUpgradeCost() {
-      return 18 + Math.pow(2, this.economyLevel);
+      return 13 + Math.pow(2, this.economyLevel);
     },
     buildTurret: function buildTurret() {
       if (this.funds < 10 || !this.active) return;

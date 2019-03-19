@@ -40,7 +40,7 @@
             <div
               class="button"
               @click="upgradeEconomy"
-              :class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
+              :class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 8)}"
             >
               <h4>Upgrade Economy</h4>
               <strong>${{economyUpgradeCost()}}</strong>
@@ -105,13 +105,13 @@ export default {
       return [1, 2, 3, 4].filter(num => num !== this.player.location);
     },
     upgradeEconomy() {
-      if (this.economyLevel >= 10 || !this.active) return;
+      if (this.economyLevel >= 8 || !this.active) return;
       this.fundsTimeout -= 200;
       this.funds -= this.economyUpgradeCost();
       this.economyLevel++;
     },
     economyUpgradeCost() {
-      return 18 + 2 ** this.economyLevel;
+      return 13 + 2 ** this.economyLevel;
     },
     buildTurret() {
       if (this.funds < 10 || !this.active) return;

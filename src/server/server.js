@@ -110,6 +110,10 @@ app.get('/player', function(req, res) {
   res.sendFile(path.resolve('dist/player.html'));
 });
 
+app.get('/game', function(req, res) {
+  res.sendFile(path.resolve('dist/game.html'));
+});
+
 app.use('/dist', express.static('dist'));
 
 // app.get('/dist/vendor.bundle.js', function(req, res) {

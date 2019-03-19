@@ -52,7 +52,7 @@ function playersRemaining() {
   let arr = [];
   Object.keys(players).forEach(key => {
     if (players[key].active) {
-      arr.push(players.location);
+      arr.push(players[key].location);
     }
   });
   return arr;

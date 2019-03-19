@@ -115,6 +115,7 @@ app.get('/game', function(req, res) {
 });
 
 app.use('/dist', express.static('dist'));
+app.use('/assets', express.static('assets'));
 
 // app.get('/dist/vendor.bundle.js', function(req, res) {
 //   res.sendFile(path.resolve('dist/vendor.bundle.js'));

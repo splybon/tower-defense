@@ -131,7 +131,7 @@ function damageEnemy(enemy, bullet) {
 }
 
 function socketListeners() {
-  socket = io('http://localhost:8080');
+  socket = io(window.location.origin);
   // socket.emit('newPlayer');
   socket.on('updatePlayer', ({ player, playerId }) => {
     players[playerId] = player;

@@ -11,13 +11,13 @@
     <div class="flex-container">
       <div class="flex-row">
         <div class="flex-box">
-          <div class="button" v-bind:class="{disabled: funds < 10}" @click="createEnemy">
+          <div class="button" :class="{disabled: funds < 10}" @click="createEnemy">
             <h4>Send Enemy</h4>
             <strong>$10</strong>
           </div>
         </div>
         <div class="flex-box">
-          <div class="button" @click="buildTurret" :disabled="funds < 10">
+          <div class="button" :class="{disabled: funds < 10}" @click="buildTurret" :disabled="funds < 10">
             <h4>Build Turret</h4>
             <strong>$10</strong>
           </div>
@@ -34,7 +34,7 @@
           <div
             class="button"
             @click="upgradeEconomy"
-            v-bind:class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
+            :class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
           >
             <h4>Upgrade Economy</h4>
             <strong>${{economyUpgradeCost()}}</strong>
@@ -65,7 +65,8 @@ export default {
       playerToAttack: null,
       started: false,
       fundsTimeout: 1500,
-      economyLevel: 1
+      economyLevel: 1,
+      turretCount: 0
     };
   },
   methods: {
@@ -102,7 +103,14 @@ export default {
       return 18 + 2 ** this.economyLevel;
     },
     buildTurret() {
-      this.socket.emit('buildTurret');
+      if (this.funds < 10) return;
+      if (this.turretCount < 4) {
+        this.funds -= 10;
+        this.turretCount++;
+        this.socket.emit('buildTurret');
+      } else {
+        alert("Can't have more than 4 turrets");
+      }
     }
   },
   created() {

@@ -153,8 +153,8 @@ var Turret = new _phaser2.default.Class({
 
   // we will place the turret according to the grid
   place: function place(i, j) {
-    this.y = i * 100 + 100 / 2;
-    this.x = j * 100 + 100 / 2;
+    this.y = i * 100 + 100 / 2 + 100;
+    this.x = j * 100 + 100 / 2 + 100;
     this.text.setX(this.x - 30);
     this.text.setY(this.y + 32);
   },
@@ -378,8 +378,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var config = {
   type: _phaser2.default.AUTO,
   parent: 'content',
-  width: 1000,
-  height: 1000,
+  width: 1200,
+  height: 1200,
   physics: {
     default: 'arcade'
   },
@@ -417,10 +417,10 @@ function create() {
 
   // the path for our enemies
   // parameters are the start x and y of our path
-  paths['y'] = this.add.path(500, 0);
-  paths['y'].lineTo(500, 1000);
-  paths['x'] = this.add.path(0, 500);
-  paths['x'].lineTo(1000, 500);
+  paths['y'] = this.add.path(600, 100);
+  paths['y'].lineTo(600, 1100);
+  paths['x'] = this.add.path(100, 600);
+  paths['x'].lineTo(1100, 600);
 
   graphics.lineStyle(3, 0xffffff, 1);
   // visualize the path
@@ -432,21 +432,22 @@ function create() {
   turrets = this.add.group({ classType: _turret2.default, runChildUpdate: true });
   bullets = this.physics.add.group({ classType: _Bullet2.default, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
+  this.add.text();
 
-  socketListeners(players);
+  socketListeners();
 }
 
 function update(time, delta) {}
 
 function drawGrid(graphics) {
-  graphics.lineStyle(1, 0x0000ff, 0.8);
-  for (var i = 0; i < 10; i++) {
-    graphics.moveTo(0, i * 100);
-    graphics.lineTo(1000, i * 100);
+  graphics.lineStyle(1, 0xffffff, 0.8);
+  for (var i = 0; i < 12; i++) {
+    graphics.moveTo(100, i * 100 + 100);
+    graphics.lineTo(1100, i * 100 + 100);
   }
-  for (var j = 0; j < 10; j++) {
-    graphics.moveTo(j * 100, 0);
-    graphics.lineTo(j * 100, 1000);
+  for (var j = 1; j < 12; j++) {
+    graphics.moveTo(j * 100, 100);
+    graphics.lineTo(j * 100, 1100);
   }
   graphics.strokePath();
 }

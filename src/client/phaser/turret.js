@@ -43,8 +43,8 @@ const Turret = new Phaser.Class({
   },
   // we will place the turret according to the grid
   place: function(i, j) {
-    this.y = i * 100 + 100 / 2;
-    this.x = j * 100 + 100 / 2;
+    this.y = i * 100 + 100 / 2 + 100;
+    this.x = j * 100 + 100 / 2 + 100;
     this.text.setX(this.x - 30);
     this.text.setY(this.y + 32);
   },

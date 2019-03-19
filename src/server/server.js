@@ -12,7 +12,8 @@ const PLAYER_STATS = {
     path: 'y',
     direction: 1,
     initialStart: [500, 0],
-    turrets: {}
+    turrets: {},
+    active: true
   },
   2: {
     color: '#4286f4',
@@ -20,7 +21,8 @@ const PLAYER_STATS = {
     path: 'x',
     direction: -1,
     initialStart: [1000, 500],
-    turrets: {}
+    turrets: {},
+    active: true
   },
   3: {
     color: '#4286f4',
@@ -28,7 +30,8 @@ const PLAYER_STATS = {
     path: 'y',
     direction: -1,
     initialStart: [500, 1000],
-    turrets: {}
+    turrets: {},
+    active: true
   },
   4: {
     color: '#4286f4',
@@ -36,13 +39,24 @@ const PLAYER_STATS = {
     path: 'x',
     direction: 1,
     initialStart: [0, 500],
-    turrets: {}
+    turrets: {},
+    active: true
   }
 };
 
 let players = {};
 
 let assignedLocations = [];
+
+function playersRemaining() {
+  let arr = [];
+  Object.keys(players).forEach(key => {
+    if (players[key].active) {
+      arr.push(players.location);
+    }
+  });
+  return arr;
+}
 
 function assignPlayerStats(socketId) {
   players[socketId] = {};
@@ -70,6 +84,16 @@ function updateTurret(playerId) {
   if (players[playerId].turrets[turretId] < 4)
     players[playerId].turrets[turretId]++;
   return turretId;
+}
+
+function findPlayerByLocation(location) {
+  let playerId;
+  Object.keys(players).forEach(key => {
+    if (players[key].location === location) {
+      playerId = key;
+    }
+  });
+  return playerId;
 }
 
 io.on('connection', function(socket) {
@@ -102,12 +126,21 @@ io.on('connection', function(socket) {
     io.emit('disconnect', socket.id);
   });
 
-  socket.on('losePlayerLife', playerId => {
+  socket.on('losePlayerLife', location => {
+    playerId = findPlayerByLocation(location);
     players[playerId].lives -= 1;
-    io.emit('updatePlayer', {
-      player: players[socket.id],
-      playerId: socket.id
+    const lives = players[playerId].lives;
+    io.emit('updateLosePlayerLife', {
+      lives: players[playerId].lives,
+      location: players[playerId].location
     });
+    if (lives <= 0) {
+      players[playerId].active = false;
+    }
+    if (playersRemaining().length <= 1) {
+      const message = `Player ${playersRemaining()[0]} has won!!!!`;
+      io.emit('victory', message);
+    }
   });
 
   socket.on('buildTurret', function() {

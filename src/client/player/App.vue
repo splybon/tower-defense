@@ -1,58 +1,61 @@
 
 <template>
   <div id="app">
-    <h2>Funds: ${{funds}}</h2>
-    <h3>Player Number: {{player.location}}</h3>
-    <hr>
-    <h2>
-      Actions
-      <button v-if="!started" class="button" @click="emitStartGame">Start Game</button>
-    </h2>
-    <div class="flex-container">
-      <div class="flex-row">
-        <div class="flex-box">
-          <div class="button" :class="{disabled: funds < 10}" @click="createEnemy">
-            <h4>Send Enemy</h4>
-            <strong>$10</strong>
+    <div v-if="active">
+      <h2>Funds: ${{funds}}</h2>
+      <h3>Player Number: {{player.location}}</h3>
+      <hr>
+      <h2>
+        Actions
+        <button v-if="!started" class="button" @click="emitStartGame">Start Game</button>
+      </h2>
+      <div class="flex-container">
+        <div class="flex-row">
+          <div class="flex-box">
+            <div class="button" :class="{disabled: funds < 10}" @click="createEnemy">
+              <h4>Send Enemy</h4>
+              <strong>$10</strong>
+            </div>
+          </div>
+          <div class="flex-box">
+            <div
+              class="button"
+              :class="{disabled: funds < 10}"
+              @click="buildTurret"
+              :disabled="funds < 10"
+            >
+              <h4>Build Turret</h4>
+              <strong>$10</strong>
+            </div>
           </div>
         </div>
-        <div class="flex-box">
-          <div
-            class="button"
-            :class="{disabled: funds < 10}"
-            @click="buildTurret"
-            :disabled="funds < 10"
-          >
-            <h4>Build Turret</h4>
-            <strong>$10</strong>
+        <div class="flex-row">
+          <div class="flex-box">
+            <div class="button" @click="upgradeTurret" :disabled="funds < 10">
+              <h4>Upgrade Turret</h4>
+              <strong>$10</strong>
+            </div>
+          </div>
+          <div class="flex-box">
+            <div
+              class="button"
+              @click="upgradeEconomy"
+              :class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
+            >
+              <h4>Upgrade Economy</h4>
+              <strong>${{economyUpgradeCost()}}</strong>
+              <br>
+              <small>Level: {{economyLevel}}</small>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="flex-row">
-        <div class="flex-box">
-          <div class="button" @click="upgradeTurret" :disabled="funds < 10">
-            <h4>Upgrade Turret</h4>
-            <strong>$10</strong>
-          </div>
+        <div class="flex-row">
+          <h4 style="flex:0.5">Select Player To Attack</h4>
+          <v-select style="flex:0.5" v-model="playerToAttack" :options="playerToAttackOptions()"></v-select>
         </div>
-        <div class="flex-box">
-          <div
-            class="button"
-            @click="upgradeEconomy"
-            :class="{disabled: (funds < this.economyUpgradeCost() || economyLevel >= 10)}"
-          >
-            <h4>Upgrade Economy</h4>
-            <strong>${{economyUpgradeCost()}}</strong>
-            <br>
-            <small>Level: {{economyLevel}}</small>
-          </div>
-        </div>
-      </div>
-      <div class="flex-row">
-        <h4 style="flex:0.5">Select Player To Attack</h4>
-        <v-select style="flex:0.5" v-model="playerToAttack" :options="playerToAttackOptions()"></v-select>
       </div>
     </div>
+    <div v-else>You Lose!</div>
   </div>
 </template>
 
@@ -62,7 +65,7 @@ import io from 'socket.io-client';
 export default {
   data() {
     return {
-      funds: 101,
+      funds: 1000,
       socket: null,
       sessionId: '',
       player: {},
@@ -71,7 +74,8 @@ export default {
       fundsTimeout: 1500,
       economyLevel: 1,
       turretCount: 0,
-      turretUpgradeCount: 0
+      turretUpgradeCount: 0,
+      active: true
     };
   },
   methods: {
@@ -79,6 +83,7 @@ export default {
       this.socket.emit('start');
     },
     addFunds() {
+      if (!this.active) return;
       this.funds += 1;
       setTimeout(() => {
         this.addFunds();
@@ -87,7 +92,8 @@ export default {
     createEnemy() {
       if (
         !this.playerToAttack ||
-        this.playerToAttack === this.player.location
+        this.playerToAttack === this.player.location ||
+        !this.active
       ) {
         alert('Select A Player To Attack First');
       } else if (this.funds >= 10) {
@@ -99,7 +105,7 @@ export default {
       return [1, 2, 3, 4].filter(num => num !== this.player.location);
     },
     upgradeEconomy() {
-      if (this.economyLevel >= 10) return;
+      if (this.economyLevel >= 10 || !this.active) return;
       this.fundsTimeout -= 200;
       this.funds -= this.economyUpgradeCost();
       this.economyLevel++;
@@ -108,7 +114,7 @@ export default {
       return 18 + 2 ** this.economyLevel;
     },
     buildTurret() {
-      if (this.funds < 10) return;
+      if (this.funds < 10 || !this.active) return;
       if (this.turretCount < 4) {
         this.funds -= 10;
         this.turretCount++;
@@ -118,7 +124,7 @@ export default {
       }
     },
     upgradeTurret() {
-      if (this.funds < 10) return;
+      if (this.funds < 10 || !this.active) return;
       // can only upgrade 4 times and it starts at level 1
       const remainingUpgrades = parseInt(
         this.turretUpgradeCount / this.turretCount
@@ -153,6 +159,13 @@ export default {
     });
 
     this.socket.emit('newPlayer');
+
+    this.socket.on('updateLosePlayerLife', ({ lives, location }) => {
+      if (location === this.player.location && lives <= 0 && this.active) {
+        this.active = false;
+        alert('You Have Lost!');
+      }
+    });
   }
 };
 </script>

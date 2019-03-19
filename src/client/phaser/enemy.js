@@ -30,11 +30,12 @@ const Enemy = new Phaser.Class({
       this.setVisible(false);
     }
   },
-  setData: function({ player, playerToAttack }) {
+  setData: function({ player, playerToAttack, socket }) {
     this.player = player;
     this.playerToAttack = playerToAttack;
     this.direction = this.player.direction;
     this.changedPosition = false;
+    this.socket = socket;
   },
   setHalfwayPath: function() {
     this.path = this.paths[PLAYER_STATS[this.playerToAttack].path];
@@ -61,6 +62,7 @@ const Enemy = new Phaser.Class({
     if (this.follower.t > 1 || this.follower.t < 0) {
       this.setActive(false);
       this.setVisible(false);
+      this.socket.emit('losePlayerLife', this.playerToAttack);
     }
   }
 });

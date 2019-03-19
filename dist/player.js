@@ -8840,124 +8840,130 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "app" } }, [
-    _c("h2", [_vm._v("Funds: $" + _vm._s(_vm.funds))]),
-    _vm._v(" "),
-    _c("h3", [_vm._v("Player Number: " + _vm._s(_vm.player.location))]),
-    _vm._v(" "),
-    _c("hr"),
-    _vm._v(" "),
-    _c("h2", [
-      _vm._v("\n    Actions\n    "),
-      !_vm.started
-        ? _c(
-            "button",
-            { staticClass: "button", on: { click: _vm.emitStartGame } },
-            [_vm._v("Start Game")]
-          )
-        : _vm._e()
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "flex-container" }, [
-      _c("div", { staticClass: "flex-row" }, [
-        _c("div", { staticClass: "flex-box" }, [
-          _c(
-            "div",
-            {
-              staticClass: "button",
-              class: { disabled: _vm.funds < 10 },
-              on: { click: _vm.createEnemy }
-            },
-            [
-              _c("h4", [_vm._v("Send Enemy")]),
-              _vm._v(" "),
-              _c("strong", [_vm._v("$10")])
-            ]
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "flex-box" }, [
-          _c(
-            "div",
-            {
-              staticClass: "button",
-              class: { disabled: _vm.funds < 10 },
-              attrs: { disabled: _vm.funds < 10 },
-              on: { click: _vm.buildTurret }
-            },
-            [
-              _c("h4", [_vm._v("Build Turret")]),
-              _vm._v(" "),
-              _c("strong", [_vm._v("$10")])
-            ]
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "flex-row" }, [
-        _c("div", { staticClass: "flex-box" }, [
-          _c(
-            "div",
-            {
-              staticClass: "button",
-              attrs: { disabled: _vm.funds < 10 },
-              on: { click: _vm.upgradeTurret }
-            },
-            [
-              _c("h4", [_vm._v("Upgrade Turret")]),
-              _vm._v(" "),
-              _c("strong", [_vm._v("$10")])
-            ]
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "flex-box" }, [
-          _c(
-            "div",
-            {
-              staticClass: "button",
-              class: {
-                disabled:
-                  _vm.funds < this.economyUpgradeCost() ||
-                  _vm.economyLevel >= 10
-              },
-              on: { click: _vm.upgradeEconomy }
-            },
-            [
-              _c("h4", [_vm._v("Upgrade Economy")]),
-              _vm._v(" "),
-              _c("strong", [_vm._v("$" + _vm._s(_vm.economyUpgradeCost()))]),
-              _vm._v(" "),
-              _c("br"),
-              _vm._v(" "),
-              _c("small", [_vm._v("Level: " + _vm._s(_vm.economyLevel))])
-            ]
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "flex-row" },
-        [
-          _c("h4", { staticStyle: { flex: "0.5" } }, [
-            _vm._v("Select Player To Attack")
+    _vm.active
+      ? _c("div", [
+          _c("h2", [_vm._v("Funds: $" + _vm._s(_vm.funds))]),
+          _vm._v(" "),
+          _c("h3", [_vm._v("Player Number: " + _vm._s(_vm.player.location))]),
+          _vm._v(" "),
+          _c("hr"),
+          _vm._v(" "),
+          _c("h2", [
+            _vm._v("\n      Actions\n      "),
+            !_vm.started
+              ? _c(
+                  "button",
+                  { staticClass: "button", on: { click: _vm.emitStartGame } },
+                  [_vm._v("Start Game")]
+                )
+              : _vm._e()
           ]),
           _vm._v(" "),
-          _c("v-select", {
-            staticStyle: { flex: "0.5" },
-            attrs: { options: _vm.playerToAttackOptions() },
-            model: {
-              value: _vm.playerToAttack,
-              callback: function($$v) {
-                _vm.playerToAttack = $$v
-              },
-              expression: "playerToAttack"
-            }
-          })
-        ],
-        1
-      )
-    ])
+          _c("div", { staticClass: "flex-container" }, [
+            _c("div", { staticClass: "flex-row" }, [
+              _c("div", { staticClass: "flex-box" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "button",
+                    class: { disabled: _vm.funds < 10 },
+                    on: { click: _vm.createEnemy }
+                  },
+                  [
+                    _c("h4", [_vm._v("Send Enemy")]),
+                    _vm._v(" "),
+                    _c("strong", [_vm._v("$10")])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "flex-box" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "button",
+                    class: { disabled: _vm.funds < 10 },
+                    attrs: { disabled: _vm.funds < 10 },
+                    on: { click: _vm.buildTurret }
+                  },
+                  [
+                    _c("h4", [_vm._v("Build Turret")]),
+                    _vm._v(" "),
+                    _c("strong", [_vm._v("$10")])
+                  ]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "flex-row" }, [
+              _c("div", { staticClass: "flex-box" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "button",
+                    attrs: { disabled: _vm.funds < 10 },
+                    on: { click: _vm.upgradeTurret }
+                  },
+                  [
+                    _c("h4", [_vm._v("Upgrade Turret")]),
+                    _vm._v(" "),
+                    _c("strong", [_vm._v("$10")])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "flex-box" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "button",
+                    class: {
+                      disabled:
+                        _vm.funds < this.economyUpgradeCost() ||
+                        _vm.economyLevel >= 10
+                    },
+                    on: { click: _vm.upgradeEconomy }
+                  },
+                  [
+                    _c("h4", [_vm._v("Upgrade Economy")]),
+                    _vm._v(" "),
+                    _c("strong", [
+                      _vm._v("$" + _vm._s(_vm.economyUpgradeCost()))
+                    ]),
+                    _vm._v(" "),
+                    _c("br"),
+                    _vm._v(" "),
+                    _c("small", [_vm._v("Level: " + _vm._s(_vm.economyLevel))])
+                  ]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "flex-row" },
+              [
+                _c("h4", { staticStyle: { flex: "0.5" } }, [
+                  _vm._v("Select Player To Attack")
+                ]),
+                _vm._v(" "),
+                _c("v-select", {
+                  staticStyle: { flex: "0.5" },
+                  attrs: { options: _vm.playerToAttackOptions() },
+                  model: {
+                    value: _vm.playerToAttack,
+                    callback: function($$v) {
+                      _vm.playerToAttack = $$v
+                    },
+                    expression: "playerToAttack"
+                  }
+                })
+              ],
+              1
+            )
+          ])
+        ])
+      : _c("div", [_vm._v("You Lose!")])
   ])
 }
 var staticRenderFns = []
@@ -9536,7 +9542,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = {
   data: function data() {
     return {
-      funds: 101,
+      funds: 1000,
       socket: null,
       sessionId: '',
       player: {},
@@ -9545,7 +9551,8 @@ exports.default = {
       fundsTimeout: 1500,
       economyLevel: 1,
       turretCount: 0,
-      turretUpgradeCount: 0
+      turretUpgradeCount: 0,
+      active: true
     };
   },
 
@@ -9556,13 +9563,14 @@ exports.default = {
     addFunds: function addFunds() {
       var _this = this;
 
+      if (!this.active) return;
       this.funds += 1;
       setTimeout(function () {
         _this.addFunds();
       }, this.fundsTimeout);
     },
     createEnemy: function createEnemy() {
-      if (!this.playerToAttack || this.playerToAttack === this.player.location) {
+      if (!this.playerToAttack || this.playerToAttack === this.player.location || !this.active) {
         alert('Select A Player To Attack First');
       } else if (this.funds >= 10) {
         this.funds -= 10;
@@ -9577,7 +9585,7 @@ exports.default = {
       });
     },
     upgradeEconomy: function upgradeEconomy() {
-      if (this.economyLevel >= 10) return;
+      if (this.economyLevel >= 10 || !this.active) return;
       this.fundsTimeout -= 200;
       this.funds -= this.economyUpgradeCost();
       this.economyLevel++;
@@ -9586,7 +9594,7 @@ exports.default = {
       return 18 + Math.pow(2, this.economyLevel);
     },
     buildTurret: function buildTurret() {
-      if (this.funds < 10) return;
+      if (this.funds < 10 || !this.active) return;
       if (this.turretCount < 4) {
         this.funds -= 10;
         this.turretCount++;
@@ -9596,7 +9604,7 @@ exports.default = {
       }
     },
     upgradeTurret: function upgradeTurret() {
-      if (this.funds < 10) return;
+      if (this.funds < 10 || !this.active) return;
       // can only upgrade 4 times and it starts at level 1
       var remainingUpgrades = parseInt(this.turretUpgradeCount / this.turretCount);
       console.log('remaining upgrades', remainingUpgrades);
@@ -9632,8 +9640,21 @@ exports.default = {
     });
 
     this.socket.emit('newPlayer');
+
+    this.socket.on('updateLosePlayerLife', function (_ref2) {
+      var lives = _ref2.lives,
+          location = _ref2.location;
+
+      if (location === _this3.player.location && lives <= 0 && _this3.active) {
+        _this3.active = false;
+        alert('You Have Lost!');
+      }
+    });
   }
 }; //
+//
+//
+//
 //
 //
 //

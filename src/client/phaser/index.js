@@ -26,7 +26,7 @@ const config = {
 const game = new Phaser.Game(config);
 
 var players = {};
-
+var playerTexts = {};
 var enemies;
 var turrets;
 var bullets;
@@ -64,12 +64,11 @@ function create() {
   paths['y'].draw(graphics);
 
   enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
-  this.nextEnemy = 0;
   turrets = this.add.group({ classType: Turret, runChildUpdate: true });
   bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
-  this.add.text();
 
+  setPlayerTexts(this);
   socketListeners();
 }
 
@@ -119,6 +118,27 @@ function damageEnemy(enemy, bullet) {
   }
 }
 
+function setPlayerTexts(gameObj) {
+  let text = gameObj.add.text(480, 50, 'Player: 1, Lives: 20', {
+    fontSize: '20px'
+  });
+  playerTexts[1] = text;
+  text = gameObj.add.text(1150, 500, 'Player: 2, Lives: 20', {
+    fontSize: '20px'
+  });
+  text.angle = 90;
+  playerTexts[2] = text;
+  text = gameObj.add.text(480, 1150, 'Player: 3, Lives: 20', {
+    fontSize: '20px'
+  });
+  playerTexts[3] = text;
+  text = gameObj.add.text(50, 700, 'Player: 4, Lives: 20', {
+    fontSize: '20px'
+  });
+  text.angle = 270;
+  playerTexts[4] = text;
+}
+
 function socketListeners() {
   const location = window.location.origin.includes('localhost')
     ? 'http://localhost:8080'
@@ -139,7 +159,9 @@ function socketListeners() {
       // place the enemy at the start of the path
       enemy.setData({
         player: players[playerId],
-        playerToAttack
+        playerToAttack,
+        playerId,
+        socket
       });
       enemy.startOnPath(paths);
     }
@@ -152,5 +174,14 @@ function socketListeners() {
 
   socket.on('userUpdateTurret', ({ level, turretId }) => {
     turretTracker[turretId].updateLevel(level);
+  });
+
+  socket.on('updateLosePlayerLife', ({ lives, location }) => {
+    const newText = `Player: ${location}, Lives: ${lives}`;
+    playerTexts[location].setText(newText);
+  });
+
+  socket.on('victory', message => {
+    alert(message);
   });
 }

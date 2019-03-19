@@ -49,12 +49,14 @@ var Enemy = new Phaser.Class({
   },
   setData: function setData(_ref) {
     var player = _ref.player,
-        playerToAttack = _ref.playerToAttack;
+        playerToAttack = _ref.playerToAttack,
+        socket = _ref.socket;
 
     this.player = player;
     this.playerToAttack = playerToAttack;
     this.direction = this.player.direction;
     this.changedPosition = false;
+    this.socket = socket;
   },
   setHalfwayPath: function setHalfwayPath() {
     this.path = this.paths[_config.PLAYER_STATS[this.playerToAttack].path];
@@ -78,6 +80,7 @@ var Enemy = new Phaser.Class({
     if (this.follower.t > 1 || this.follower.t < 0) {
       this.setActive(false);
       this.setVisible(false);
+      this.socket.emit('losePlayerLife', this.playerToAttack);
     }
   }
 });
@@ -394,7 +397,7 @@ var config = {
 var game = new _phaser2.default.Game(config);
 
 var players = {};
-
+var playerTexts = {};
 var enemies;
 var turrets;
 var bullets;
@@ -428,12 +431,11 @@ function create() {
   paths['y'].draw(graphics);
 
   enemies = this.physics.add.group({ classType: _enemy2.default, runChildUpdate: true });
-  this.nextEnemy = 0;
   turrets = this.add.group({ classType: _turret2.default, runChildUpdate: true });
   bullets = this.physics.add.group({ classType: _Bullet2.default, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
-  this.add.text();
 
+  setPlayerTexts(this);
   socketListeners();
 }
 
@@ -484,6 +486,27 @@ function damageEnemy(enemy, bullet) {
   }
 }
 
+function setPlayerTexts(gameObj) {
+  var text = gameObj.add.text(480, 50, 'Player: 1, Lives: 20', {
+    fontSize: '20px'
+  });
+  playerTexts[1] = text;
+  text = gameObj.add.text(1150, 500, 'Player: 2, Lives: 20', {
+    fontSize: '20px'
+  });
+  text.angle = 90;
+  playerTexts[2] = text;
+  text = gameObj.add.text(480, 1150, 'Player: 3, Lives: 20', {
+    fontSize: '20px'
+  });
+  playerTexts[3] = text;
+  text = gameObj.add.text(50, 700, 'Player: 4, Lives: 20', {
+    fontSize: '20px'
+  });
+  text.angle = 270;
+  playerTexts[4] = text;
+}
+
 function socketListeners() {
   var location = window.location.origin.includes('localhost') ? 'http://localhost:8080' : window.location.origin;
   socket = (0, _socket2.default)(location);
@@ -508,7 +531,9 @@ function socketListeners() {
       // place the enemy at the start of the path
       enemy.setData({
         player: players[playerId],
-        playerToAttack: playerToAttack
+        playerToAttack: playerToAttack,
+        playerId: playerId,
+        socket: socket
       });
       enemy.startOnPath(paths);
     }
@@ -529,6 +554,18 @@ function socketListeners() {
         turretId = _ref4.turretId;
 
     turretTracker[turretId].updateLevel(level);
+  });
+
+  socket.on('updateLosePlayerLife', function (_ref5) {
+    var lives = _ref5.lives,
+        location = _ref5.location;
+
+    var newText = 'Player: ' + location + ', Lives: ' + lives;
+    playerTexts[location].setText(newText);
+  });
+
+  socket.on('victory', function (message) {
+    alert(message);
   });
 }
 

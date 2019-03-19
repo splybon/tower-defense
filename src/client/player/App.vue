@@ -70,7 +70,8 @@ export default {
       started: false,
       fundsTimeout: 1500,
       economyLevel: 1,
-      turretCount: 0
+      turretCount: 0,
+      turretUpgradeCount: 0
     };
   },
   methods: {
@@ -118,9 +119,16 @@ export default {
     },
     upgradeTurret() {
       if (this.funds < 10) return;
-      if (this.turretUpgradeCount > 12) {
+      // can only upgrade 4 times and it starts at level 1
+      const remainingUpgrades = parseInt(
+        this.turretUpgradeCount / this.turretCount
+      );
+      console.log('remaining upgrades', remainingUpgrades);
+      if (remainingUpgrades >= 3) {
         alert('Max upgrades reached');
       } else {
+        this.turretUpgradeCount++;
+        this.funds -= 10;
         this.socket.emit('updateTurret');
       }
     }

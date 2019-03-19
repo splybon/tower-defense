@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _config = __webpack_require__(/*! ./config */ 603);
+var _config = __webpack_require__(/*! ./config */ 320);
 
 var Enemy = new Phaser.Class({
   Extends: Phaser.GameObjects.Image,
@@ -65,7 +65,6 @@ var Enemy = new Phaser.Class({
     this.follower.t += _config.ENEMY_SPEED * this.direction;
     var newT = this.follower.t;
 
-    console.log('stats', { direction: this.direction, newT: newT });
     if (!this.changedPosition && this.direction === 1 && newT >= 0.5 || this.direction === -1 && newT <= 0.5) {
       this.setHalfwayPath();
     }
@@ -111,18 +110,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function getEnemy(enemies, x, y, distance, location) {
   var enemyUnits = enemies.getChildren();
   for (var i = 0; i < enemyUnits.length; i++) {
-    console.log('enemy location', enemyUnits[i].location);
-    console.log('turret location', location);
     if (enemyUnits[i].player.location === location) continue;
     if (enemyUnits[i].active && _phaser2.default.Math.Distance.Between(x, y, enemyUnits[i].x, enemyUnits[i].y) <= distance) return enemyUnits[i];
   }
   return false;
 }
 
-function addBullet(bullets, x, y, angle) {
+function addBullet(bullets, x, y, angle, level) {
   var bullet = bullets.get();
   if (bullet) {
-    bullet.fire(x, y, angle);
+    bullet.fire(x, y, angle, level);
   }
 }
 
@@ -136,22 +133,36 @@ var Turret = new _phaser2.default.Class({
   setVars: function setVars(_ref) {
     var enemies = _ref.enemies,
         bullets = _ref.bullets,
-        location = _ref.location;
+        location = _ref.location,
+        level = _ref.level,
+        id = _ref.id,
+        text = _ref.text;
 
     this.location = location;
     this.enemies = enemies;
     this.bullets = bullets;
+    this.level = level;
+    this.id = id;
+    this.text = text;
   },
+  updateLevel: function updateLevel(level) {
+    console.log('updating level to ', level);
+    this.level = level;
+    this.text.setText('level ' + this.level);
+  },
+
   // we will place the turret according to the grid
   place: function place(i, j) {
     this.y = i * 100 + 100 / 2;
     this.x = j * 100 + 100 / 2;
+    this.text.setX(this.x - 30);
+    this.text.setY(this.y + 32);
   },
   fire: function fire() {
     var enemy = getEnemy(this.enemies, this.x, this.y, 200, this.location);
     if (enemy) {
       var angle = _phaser2.default.Math.Angle.Between(this.x, this.y, enemy.x, enemy.y);
-      addBullet(this.bullets, this.x, this.y, angle);
+      addBullet(this.bullets, this.x, this.y, angle, this.level);
       this.angle = (angle + Math.PI / 2) * _phaser2.default.Math.RAD_TO_DEG;
     }
   },
@@ -182,6 +193,9 @@ exports.default = Turret;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _config = __webpack_require__(/*! ./config */ 320);
+
 var Bullet = Phaser.Class({
   Extends: Phaser.GameObjects.Image,
 
@@ -195,7 +209,8 @@ var Bullet = Phaser.Class({
     this.speed = Phaser.Math.GetSpeed(600, 1);
   },
 
-  fire: function fire(x, y, angle) {
+  fire: function fire(x, y, angle, level) {
+    this.level = level;
     this.setActive(true);
     this.setVisible(true);
 
@@ -209,6 +224,11 @@ var Bullet = Phaser.Class({
     this.dy = Math.sin(angle);
 
     this.lifespan = 1000;
+  },
+  damage: function damage() {
+    var damage = _config.BULLET_DAMAGE * Math.min(this.level, 4);
+    console.log('firing with damage', damage);
+    return damage;
   },
 
   update: function update(time, delta) {
@@ -228,7 +248,7 @@ exports.default = Bullet;
 
 /***/ }),
 
-/***/ 603:
+/***/ 320:
 /*!*************************************!*\
   !*** ./src/client/phaser/config.js ***!
   \*************************************/
@@ -314,7 +334,7 @@ var PLAYER_STATS = exports.PLAYER_STATS = {
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! babel-polyfill */325);
+__webpack_require__(/*! babel-polyfill */326);
 module.exports = __webpack_require__(/*! /Users/scott.plybon/Games/tower-defense/src/client/phaser */821);
 
 
@@ -347,7 +367,7 @@ var _Bullet = __webpack_require__(/*! ./Bullet */ 1504);
 
 var _Bullet2 = _interopRequireDefault(_Bullet);
 
-var _config = __webpack_require__(/*! ./config */ 603);
+var _config = __webpack_require__(/*! ./config */ 320);
 
 var _socket = __webpack_require__(/*! socket.io-client */ 604);
 
@@ -380,6 +400,7 @@ var turrets;
 var bullets;
 var paths = {};
 var socket;
+var turretTracker = {};
 
 function preload() {
   // load the game assets – enemy and turret atlas
@@ -409,7 +430,6 @@ function create() {
   enemies = this.physics.add.group({ classType: _enemy2.default, runChildUpdate: true });
   this.nextEnemy = 0;
   turrets = this.add.group({ classType: _turret2.default, runChildUpdate: true });
-  this.input.on('pointerdown', placePointerTurret);
   bullets = this.physics.add.group({ classType: _Bullet2.default, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
 
@@ -431,33 +451,21 @@ function drawGrid(graphics) {
   graphics.strokePath();
 }
 
-function placePointerTurret(pointer) {
-  var i = Math.floor(pointer.y / 100);
-  var j = Math.floor(pointer.x / 100);
-  console.log('i', i);
-  console.log('j', j);
-  if (_config.MAP[i][j] === 0) {
-    var turret = turrets.get();
-    if (turret) {
-      turret.setActive(true);
-      turret.setVisible(true);
-      turret.setVars({ enemies: enemies, bullets: bullets });
-      turret.place(i, j);
-      _config.MAP[i][j] === 1;
-    }
-  }
-}
-
-function placeTurret(playerId, turretCount) {
+function placeTurret(playerId, turretCount, level, id) {
   var turret = turrets.get();
+  turretTracker[id] = turret;
   if (turret) {
     var location = players[playerId].location;
 
     var j = _config.PLAYER_STATS[location].turretPlacement[turretCount][0];
     var i = _config.PLAYER_STATS[location].turretPlacement[turretCount][1];
+    var text = game.scene.scenes[0].add.text(0, 0, 'Level 1', {
+      fontSize: '15px',
+      fill: '#ffffff'
+    });
     turret.setActive(true);
     turret.setVisible(true);
-    turret.setVars({ enemies: enemies, bullets: bullets, location: location });
+    turret.setVars({ enemies: enemies, bullets: bullets, location: location, level: level, id: id, text: text });
     turret.place(i, j);
     console.log('turretPlaced');
   }
@@ -471,12 +479,13 @@ function damageEnemy(enemy, bullet) {
     bullet.setVisible(false);
 
     // decrease the enemy hp with BULLET_DAMAGE
-    enemy.receiveDamage(_config.BULLET_DAMAGE);
+    enemy.receiveDamage(bullet.damage());
   }
 }
 
 function socketListeners() {
-  socket = (0, _socket2.default)('http://localhost:8080');
+  var location = window.location.origin.includes('localhost') ? 'http://localhost:8080' : window.location.origin;
+  socket = (0, _socket2.default)(location);
   // socket.emit('newPlayer');
   socket.on('updatePlayer', function (_ref) {
     var player = _ref.player,
@@ -506,10 +515,19 @@ function socketListeners() {
 
   socket.on('userBuildTurret', function (_ref3) {
     var playerId = _ref3.playerId,
-        turretCount = _ref3.turretCount;
+        turretCount = _ref3.turretCount,
+        turretId = _ref3.turretId,
+        level = _ref3.level;
 
     players[playerId].turretCount;
-    placeTurret(playerId, turretCount);
+    placeTurret(playerId, turretCount, level, turretId);
+  });
+
+  socket.on('userUpdateTurret', function (_ref4) {
+    var level = _ref4.level,
+        turretId = _ref4.turretId;
+
+    turretTracker[turretId].updateLevel(level);
   });
 }
 

@@ -3,7 +3,7 @@ import Enemy from './enemy';
 import Turret from './turret';
 import Bullet from './Bullet';
 
-import { MAP, BULLET_DAMAGE, PLAYER_STATS } from './config';
+import { MAP, PLAYER_STATS } from './config';
 
 import io from 'socket.io-client';
 
@@ -32,6 +32,7 @@ var turrets;
 var bullets;
 var paths = {};
 var socket;
+var turretTracker = {};
 
 function preload() {
   // load the game assets – enemy and turret atlas
@@ -65,7 +66,6 @@ function create() {
   enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
   this.nextEnemy = 0;
   turrets = this.add.group({ classType: Turret, runChildUpdate: true });
-  this.input.on('pointerdown', placePointerTurret);
   bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
   this.physics.add.overlap(enemies, bullets, damageEnemy);
 
@@ -87,32 +87,20 @@ function drawGrid(graphics) {
   graphics.strokePath();
 }
 
-function placePointerTurret(pointer) {
-  const i = Math.floor(pointer.y / 100);
-  const j = Math.floor(pointer.x / 100);
-  console.log('i', i);
-  console.log('j', j);
-  if (MAP[i][j] === 0) {
-    const turret = turrets.get();
-    if (turret) {
-      turret.setActive(true);
-      turret.setVisible(true);
-      turret.setVars({ enemies, bullets });
-      turret.place(i, j);
-      MAP[i][j] === 1;
-    }
-  }
-}
-
-function placeTurret(playerId, turretCount) {
+function placeTurret(playerId, turretCount, level, id) {
   const turret = turrets.get();
+  turretTracker[id] = turret;
   if (turret) {
     const { location } = players[playerId];
     const j = PLAYER_STATS[location].turretPlacement[turretCount][0];
     const i = PLAYER_STATS[location].turretPlacement[turretCount][1];
+    const text = game.scene.scenes[0].add.text(0, 0, 'Level 1', {
+      fontSize: '15px',
+      fill: '#ffffff'
+    });
     turret.setActive(true);
     turret.setVisible(true);
-    turret.setVars({ enemies, bullets, location });
+    turret.setVars({ enemies, bullets, location, level, id, text });
     turret.place(i, j);
     console.log('turretPlaced');
   }
@@ -126,12 +114,15 @@ function damageEnemy(enemy, bullet) {
     bullet.setVisible(false);
 
     // decrease the enemy hp with BULLET_DAMAGE
-    enemy.receiveDamage(BULLET_DAMAGE);
+    enemy.receiveDamage(bullet.damage());
   }
 }
 
 function socketListeners() {
-  socket = io(window.location.origin);
+  const location = window.location.origin.includes('localhost')
+    ? 'http://localhost:8080'
+    : window.location.origin;
+  socket = io(location);
   // socket.emit('newPlayer');
   socket.on('updatePlayer', ({ player, playerId }) => {
     players[playerId] = player;
@@ -153,8 +144,12 @@ function socketListeners() {
     }
   });
 
-  socket.on('userBuildTurret', ({ playerId, turretCount }) => {
+  socket.on('userBuildTurret', ({ playerId, turretCount, turretId, level }) => {
     players[playerId].turretCount;
-    placeTurret(playerId, turretCount);
+    placeTurret(playerId, turretCount, level, turretId);
+  });
+
+  socket.on('userUpdateTurret', ({ level, turretId }) => {
+    turretTracker[turretId].updateLevel(level);
   });
 }

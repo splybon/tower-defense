@@ -17,7 +17,12 @@
           </div>
         </div>
         <div class="flex-box">
-          <div class="button" :class="{disabled: funds < 10}" @click="buildTurret" :disabled="funds < 10">
+          <div
+            class="button"
+            :class="{disabled: funds < 10}"
+            @click="buildTurret"
+            :disabled="funds < 10"
+          >
             <h4>Build Turret</h4>
             <strong>$10</strong>
           </div>
@@ -25,7 +30,7 @@
       </div>
       <div class="flex-row">
         <div class="flex-box">
-          <div class="button" @click="createEnemy" :disabled="funds < 10">
+          <div class="button" @click="upgradeTurret" :disabled="funds < 10">
             <h4>Upgrade Turret</h4>
             <strong>$10</strong>
           </div>
@@ -57,8 +62,7 @@ import io from 'socket.io-client';
 export default {
   data() {
     return {
-      message: 'Hello World',
-      funds: 10,
+      funds: 101,
       socket: null,
       sessionId: '',
       player: {},
@@ -111,10 +115,21 @@ export default {
       } else {
         alert("Can't have more than 4 turrets");
       }
+    },
+    upgradeTurret() {
+      if (this.funds < 10) return;
+      if (this.turretUpgradeCount > 12) {
+        alert('Max upgrades reached');
+      } else {
+        this.socket.emit('updateTurret');
+      }
     }
   },
   created() {
-    this.socket = io(window.location.origin);
+    const location = window.location.origin.includes('localhost')
+      ? 'http://localhost:8080'
+      : window.location.origin;
+    this.socket = io(location);
     this.socket.on('connect', () => {
       this.sessionId = this.socket.id; //
     });

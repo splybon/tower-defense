@@ -45,7 +45,6 @@ const Enemy = new Phaser.Class({
     this.follower.t += ENEMY_SPEED * this.direction;
     const newT = this.follower.t;
 
-    console.log('stats', { direction: this.direction, newT });
     if (
       (!this.changedPosition && (this.direction === 1 && newT >= 0.5)) ||
       (this.direction === -1 && newT <= 0.5)

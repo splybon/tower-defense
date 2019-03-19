@@ -1,3 +1,5 @@
+import { BULLET_DAMAGE } from './config';
+
 const Bullet = Phaser.Class({
   Extends: Phaser.GameObjects.Image,
 
@@ -11,7 +13,8 @@ const Bullet = Phaser.Class({
     this.speed = Phaser.Math.GetSpeed(600, 1);
   },
 
-  fire: function(x, y, angle) {
+  fire: function(x, y, angle, level) {
+    this.level = level;
     this.setActive(true);
     this.setVisible(true);
 
@@ -26,7 +29,11 @@ const Bullet = Phaser.Class({
 
     this.lifespan = 1000;
   },
-
+  damage() {
+    const damage = BULLET_DAMAGE * Math.min(this.level, 4);
+    console.log('firing with damage', damage);
+    return damage;
+  },
   update: function(time, delta) {
     this.lifespan -= delta;
 
@@ -37,7 +44,7 @@ const Bullet = Phaser.Class({
       this.setActive(false);
       this.setVisible(false);
     }
-  },
+  }
 });
 
 export default Bullet;

@@ -8,7 +8,7 @@ webpackJsonp([0],{
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! babel-polyfill */325);
+__webpack_require__(/*! babel-polyfill */326);
 module.exports = __webpack_require__(/*! /Users/scott.plybon/Games/tower-defense/src/client/player */1532);
 
 
@@ -8880,6 +8880,7 @@ var render = function() {
             "div",
             {
               staticClass: "button",
+              class: { disabled: _vm.funds < 10 },
               attrs: { disabled: _vm.funds < 10 },
               on: { click: _vm.buildTurret }
             },
@@ -8899,7 +8900,7 @@ var render = function() {
             {
               staticClass: "button",
               attrs: { disabled: _vm.funds < 10 },
-              on: { click: _vm.createEnemy }
+              on: { click: _vm.upgradeTurret }
             },
             [
               _c("h4", [_vm._v("Upgrade Turret")]),
@@ -9535,15 +9536,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = {
   data: function data() {
     return {
-      message: 'Hello World',
-      funds: 10,
+      funds: 101,
       socket: null,
       sessionId: '',
       player: {},
       playerToAttack: null,
       started: false,
       fundsTimeout: 1500,
-      economyLevel: 1
+      economyLevel: 1,
+      turretCount: 0
     };
   },
 
@@ -9584,13 +9585,29 @@ exports.default = {
       return 18 + Math.pow(2, this.economyLevel);
     },
     buildTurret: function buildTurret() {
-      this.socket.emit('buildTurret');
+      if (this.funds < 10) return;
+      if (this.turretCount < 4) {
+        this.funds -= 10;
+        this.turretCount++;
+        this.socket.emit('buildTurret');
+      } else {
+        alert("Can't have more than 4 turrets");
+      }
+    },
+    upgradeTurret: function upgradeTurret() {
+      if (this.funds < 10) return;
+      if (this.turretUpgradeCount > 12) {
+        alert('Max upgrades reached');
+      } else {
+        this.socket.emit('updateTurret');
+      }
     }
   },
   created: function created() {
     var _this3 = this;
 
-    this.socket = (0, _socket2.default)(window.location.origin);
+    var location = window.location.origin.includes('localhost') ? 'http://localhost:8080' : window.location.origin;
+    this.socket = (0, _socket2.default)(location);
     this.socket.on('connect', function () {
       _this3.sessionId = _this3.socket.id; //
     });
@@ -9611,6 +9628,11 @@ exports.default = {
     this.socket.emit('newPlayer');
   }
 }; //
+//
+//
+//
+//
+//
 //
 //
 //

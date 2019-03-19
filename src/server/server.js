@@ -3,6 +3,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var path = require('path');
+const shortid = require('shortid');
 
 const PLAYER_STATS = {
   1: {
@@ -11,7 +12,7 @@ const PLAYER_STATS = {
     path: 'y',
     direction: 1,
     initialStart: [500, 0],
-    turretCount: 0
+    turrets: {}
   },
   2: {
     color: '#4286f4',
@@ -19,7 +20,7 @@ const PLAYER_STATS = {
     path: 'x',
     direction: -1,
     initialStart: [1000, 500],
-    turretCount: 0
+    turrets: {}
   },
   3: {
     color: '#4286f4',
@@ -27,7 +28,7 @@ const PLAYER_STATS = {
     path: 'y',
     direction: -1,
     initialStart: [500, 1000],
-    turretCount: 0
+    turrets: {}
   },
   4: {
     color: '#4286f4',
@@ -35,7 +36,7 @@ const PLAYER_STATS = {
     path: 'x',
     direction: 1,
     initialStart: [0, 500],
-    turretCount: 0
+    turrets: {}
   }
 };
 
@@ -52,6 +53,23 @@ function assignPlayerStats(socketId) {
     location = 4;
   }
   Object.assign(players[socketId], PLAYER_STATS[location] || PLAYER_STATS[4]);
+}
+
+function buildTurret(playerId) {
+  const id = shortid.generate();
+  players[playerId].turrets[id] = 1;
+  return id;
+}
+
+function updateTurret(playerId) {
+  const turrets = players[playerId].turrets;
+  const turretId = Object.keys(turrets).reduce((acc, curr) => {
+    if (turrets[curr] < (turrets[acc] || 100)) return curr;
+    return acc;
+  });
+  if (players[playerId].turrets[turretId] < 4)
+    players[playerId].turrets[turretId]++;
+  return turretId;
 }
 
 io.on('connection', function(socket) {
@@ -93,10 +111,20 @@ io.on('connection', function(socket) {
   });
 
   socket.on('buildTurret', function() {
-    players[socket.id].turretCount++;
+    const turretId = buildTurret(socket.id);
     io.emit('userBuildTurret', {
       playerId: socket.id,
-      turretCount: players[socket.id].turretCount
+      turretCount: Object.keys(players[socket.id].turrets).length,
+      turretId: turretId,
+      level: players[socket.id].turrets[turretId]
+    });
+  });
+
+  socket.on('updateTurret', function() {
+    const turretId = updateTurret(socket.id);
+    io.emit('userUpdateTurret', {
+      turretId,
+      level: players[socket.id].turrets[turretId]
     });
   });
 });

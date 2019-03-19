@@ -101,7 +101,7 @@ io.on('connection', function(socket) {
   });
 });
 
-app.set('port', 8080);
+app.set('port', process.env.PORT || 8080);
 server.listen(app.get('port'), function() {
   console.log(`Listening on ${server.address().port}`);
 });

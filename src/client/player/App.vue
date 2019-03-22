@@ -65,7 +65,7 @@ import io from 'socket.io-client';
 export default {
   data() {
     return {
-      funds: 1000,
+      funds: 25,
       socket: null,
       sessionId: '',
       player: {},

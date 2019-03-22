@@ -9542,7 +9542,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = {
   data: function data() {
     return {
-      funds: 1000,
+      funds: 25,
       socket: null,
       sessionId: '',
       player: {},
